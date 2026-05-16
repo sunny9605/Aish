@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Aishwarya Satyanarayana | My Eternal Garden</title>
+    <!-- Three.js and OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* Romantic, deeply attractive, luxurious love palette */
+            --bg-gradient: linear-gradient(135deg, #1a0011 0%, #3d001d 40%, #67002d 70%, #2b0021 100%);
+            --panel-bg: rgba(255, 182, 193, 0.08);
+            --panel-border: rgba(255, 105, 180, 0.25);
+            --text-main: #fff0f5;
+            --text-sub: #ffb6c1;
+            --accent: #ff3366;
+            --glow: 0 0 25px rgba(255, 51, 102, 0.75);
+            --gold: #ffd700;
+        }
+
+        [data-theme="light"] {
+            --bg-gradient: linear-gradient(135deg, #fff0f6 0%, #ffdde1 45%, #ee9ca7 80%, #ffdde1 100%);
+            --panel-bg: rgba(255, 255, 255, 0.45);
+            --panel-border: rgba(255, 51, 102, 0.3);
+            --text-main: #4a001e;
+            --text-sub: #80003a;
+            --accent: #e6005c;
+            --glow: 0 0 20px rgba(230, 0, 92, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-main);
+            background: var(--bg-gradient);
+            transition: background 1.5s ease;
+        }
+
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: auto;
+        }
+
+        /* Loading Screen with elegant Rose Heart bloom */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #11000b;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.2s ease;
+        }
+
+        .flower-loader {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            animation: pulseLoader 2.5s ease-in-out infinite alternate;
+        }
+
+        .heart-petal {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #ff3366, #ff85a2);
+            border-radius: 50% 50% 0 50%;
+            top: 35px;
+            left: 35px;
+            transform-origin: bottom right;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);
+        }
+
+        .heart-petal:nth-child(1) { transform: rotate(0deg) scale(1); }
+        .heart-petal:nth-child(2) { transform: rotate(45deg) scale(0.95); }
+        .heart-petal:nth-child(3) { transform: rotate(90deg) scale(1); }
+        .heart-petal:nth-child(4) { transform: rotate(135deg) scale(0.95); }
+        .heart-petal:nth-child(5) { transform: rotate(180deg) scale(1); }
+        .heart-petal:nth-child(6) { transform: rotate(225deg) scale(0.95); }
+        .heart-petal:nth-child(7) { transform: rotate(270deg) scale(1); }
+        .heart-petal:nth-child(8) { transform: rotate(315deg) scale(0.95); }
+
+        .loader-text {
+            margin-top: 40px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            color: #ffb6c1;
+            text-shadow: 0 0 15px rgba(255,182,193,0.6);
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        @keyframes pulseLoader {
+            0% { transform: scale(0.8) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(20deg); }
+        }
+
+        /* UI Overlay Layout */
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Allura', cursive;
+            font-size: 2.6rem;
+            font-weight: 500;
+            color: var(--text-main);
+            text-shadow: 0 0 15px rgba(255, 51, 102, 0.5), 0 0 5px var(--gold);
+        }
+
+        .controls-panel {
+            display: flex;
+            gap: 15px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--panel-border);
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: 0 8px 32px 0 rgba(103, 0, 45, 0.25);
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--accent);
+            transform: scale(1.15);
+            box-shadow: var(--glow);
+        }
+
+        /* Dedicated Permanent Dedication Banner */
+        .dedication-banner {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--gold);
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+            z-index: 90;
+            text-align: center;
+            width: auto;
+            pointer-events: auto;
+        }
+
+        /* Content Container Sections */
+        .content-container {
+            position: relative;
+            width: 100%;
+        }
+
+        section {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 100px 8%;
+            box-sizing: border-box;
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(43, 0, 33, 0.4), rgba(103, 0, 45, 0.15));
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--panel-border);
+            border-radius: 32px;
+            padding: 55px;
+            max-width: 650px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.45), inset 0 0 20px rgba(255, 182, 193, 0.1);
+            transform: translateY(60px);
+            opacity: 0;
+            transition: all 1.4s cubic-bezier(0.19, 1, 0.22, 1);
+            pointer-events: auto;
+        }
+
+        section.active .glass-card {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .love-note {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2.2rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+            text-shadow: var(--glow);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.25;
+            background: linear-gradient(45deg, #ffffff, #ffb6c1, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: var(--text-main);
+            opacity: 0.9;
+            margin-bottom: 35px;
+        }
+
+        .btn-explore {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 40px;
+            background: linear-gradient(45deg, #ff3366, #ff0055, #ff66b2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: var(--glow);
+            transition: all 0.4s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-explore:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 0 35px rgba(255, 51, 102, 0.9);
+        }
+
+        /* Responsive journey layouts */
+        #sec-tulips { justify-content: flex-end; }
+        #sec-orchids { justify-content: flex-start; }
+        #sec-lilies { justify-content: flex-end; }
+        #sec-sunflowers { justify-content: flex-start; }
+        #sec-cherries { justify-content: flex-end; }
+
+        /* Navigation HUD Controls */
+        .info-hud {
+            position: fixed;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(26, 0, 17, 0.5);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--panel-border);
+            padding: 15px 35px;
+            border-radius: 50px;
+            display: flex;
+            gap: 25px;
+            z-index: 100;
+            pointer-events: auto;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        }
+
+        .hud-item {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            opacity: 0.5;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+
+        .hud-item.active, .hud-item:hover {
+            opacity: 1;
+            color: var(--accent);
+            text-shadow: var(--glow);
+            transform: scale(1.08);
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            .logo { font-size: 2rem; }
+            .dedication-banner { font-size: 0.9rem; top: 85px; width: 90%; }
+            h1 { font-size: 2.2rem; }
+            .love-note { font-size: 1.8rem; }
+            section { padding: 120px 4% 60px 4%; justify-content: center !important; }
+            .glass-card { padding: 30px; }
+            .info-hud { width: 85%; overflow-x: auto; white-space: nowrap; padding: 12px 20px; gap: 15px; bottom: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen Architecture -->
+    <div id="loader">
+        <div class="flower-loader">
+            <div class="heart-petal"></div>
+            <div class="heart-petal"></div>
+            <div class="heart-petal"></div>
+            <div class="heart-petal"></div>
+            <div class="heart-petal"></div>
+            <div class="heart-petal"></div>
+            <div class="heart-petal"></div>
+            <div class="heart-petal"></div>
+        </div>
+        <div class="loader-text">Growing a romantic haven for Aishwarya Satyanarayana...</div>
+    </div>
+
+    <!-- 3D Canvas Context Container -->
+    <div id="webgl-container"></div>
+
+    <!-- UI Overlay Layer Design -->
+    <div class="ui-layer">
+        <header>
+            <div class="logo">Aishwarya (Aish)</div>
+            <div class="controls-panel">
+                <button class="icon-btn" id="theme-toggle" title="Change Mood"><i class="fas fa-heart"></i></button>
+                <button class="icon-btn" id="music-toggle" title="Play Melody"><i class="fas fa-volume-mute"></i></button>
+            </div>
+        </header>
+
+        <div class="dedication-banner">Thanks for being born</div>
+
+        <main class="content-container">
+            <section id="sec-roses" class="active">
+                <div class="glass-card">
+                    <div class="love-note">I'm so glad to have you...</div>
+                    <h1>Crimson Velvet Roses</h1>
+                    <p>There aren't enough words to tell you how deep my love runs. Like these vibrant crimson roses blooming elegantly under infinity, you bring unconditional color, beauty, and light to every single corner of my universe.</p>
+                    <button class="btn-explore" onclick="focusSpecies(0)"><i class="fas fa-heart"></i> Draw Near</button>
+                </div>
+            </section>
+
+            <section id="sec-tulips">
+                <div class="glass-card">
+                    <div class="love-note">You are my pure joy...</div>
+                    <h1>Elegant Golden Tulips</h1>
+                    <p>Your presence is like spring arriving on the coldest winter day. These gracefully detailed golden tulips represent the absolute happiness and warmth that flows directly into my heart whenever you are near.</p>
+                    <button class="btn-explore" onclick="focusSpecies(1)"><i class="fas fa-heart"></i> Draw Near</button>
+                </div>
+            </section>
+
+            <section id="sec-orchids">
+                <div class="glass-card">
+                    <div class="love-note">Rare and magnificent...</div>
+                    <h1>Exotic Pink Orchids</h1>
+                    <p>You are my once-in-a-lifetime miracle, completely distinct and breathtakingly magnificent. These deeply structural, layered pink orchids mirror your unmatched grace and the incredible strength of your gentle soul.</p>
+                    <button class="btn-explore" onclick="focusSpecies(2)"><i class="fas fa-heart"></i> Draw Near</button>
+                </div>
+            </section>
+
+            <section id="sec-lilies">
+                <div class="glass-card">
+                    <div class="love-note">Purity of my heart...</div>
+                    <h1>Majestic StarLilies</h1>
+                    <p>In a complicated world, you are my serene, peaceful, and honest haven. These elegant white and pink starlilies bloom with open hearts, standing perfectly pure and endlessly bright, just like my devotion to you.</p>
+                    <button class="btn-explore" onclick="focusSpecies(3)"><i class="fas fa-heart"></i> Draw Near</button>
+                </div>
+            </section>
+
+            <section id="sec-sunflowers">
+                <div class="glass-card">
+                    <div class="love-note">My constant sunshine...</div>
+                    <h1>Radiant Sunflowers</h1>
+                    <p>No matter where life goes, my eyes will always turn toward you, just like these majestic sunflowers tracking the warm rays of the sun. You inspire me to grow, stay strong, and live beautifully.</p>
+                    <button class="btn-explore" onclick="focusSpecies(4)"><i class="fas fa-heart"></i> Draw Near</button>
+                </div>
+            </section>
+
+            <section id="sec-cherries">
+                <div class="glass-card">
+                    <div class="love-note">Thanks for being born...</div>
+                    <h1>Blossoming Sakura</h1>
+                    <p>Every single moment with you is precious, an exquisite celebration of life itself. I thank the universe every day that you exist. Walk with me under this gentle cloud of falling cherry blossoms forever.</p>
+                    <button class="btn-explore" onclick="focusSpecies(5)"><i class="fas fa-heart"></i> Draw Near</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Navigation HUD Panel -->
+        <nav class="info-hud">
+            <div class="hud-item active" onclick="scrollToSection('sec-roses')">Rose</div>
+            <div class="hud-item" onclick="scrollToSection('sec-tulips')">Tulip</div>
+            <div class="hud-item" onclick="scrollToSection('sec-orchids')">Orchid</div>
+            <div class="hud-item" onclick="scrollToSection('sec-lilies')">Lily</div>
+            <div class="hud-item" onclick="scrollToSection('sec-sunflowers')">Sunflower</div>
+            <div class="hud-item" onclick="scrollToSection('sec-cherries')">Sakura</div>
+        </nav>
+    </div>
+
+    <!-- Web Audio API Ambient Soundscapes Synthesizer Engine -->
+    <script>
+        class RomanticAudioEngine {
+
+            
+            constructor() {
+                this.ctx = null;
+                this.playing = false;
+                this.nodes = [];
+            }
+            init() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Warm, soft cinematic harmony chord pads (E-flat major luxury spectrum)
+                const fundamentalFreqs = [77.78, 155.56, 233.08, 311.13, 389.23, 466.16];
+                
+                fundamentalFreqs.forEach((f, idx) => {
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    
+                    // Pure warm sine blending with comforting soft triangle soundwaves
+                    osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+                    osc.frequency.setValueAtTime(f, this.ctx.currentTime);
+                    
+                    // Low frequency modulator for gentle ocean-like breathing swells
+                    let breathingLfo = this.ctx.createOscillator();
+                    breathingLfo.frequency.setValueAtTime(0.04 + idx * 0.015, this.ctx.currentTime);
+                    let lfoGain = this.ctx.createGain();
+                    lfoGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+                    
+                    breathingLfo.connect(lfoGain);
+                    lfoGain.connect(gain.gain);
+                    
+                    gain.gain.setValueAtTime(0.03 / fundamentalFreqs.length, this.ctx.currentTime);
+                    
+                    // Lowpass filter configuration for smooth warmth
+                    let filter = this.ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(600, this.ctx.currentTime);
+                    
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    
+                    this.nodes.push({ osc, breathingLfo, gain });
+                });
+            }
+            start() {
+                if(!this.ctx) this.init();
+                if(this.playing) return;
+                this.ctx.resume();
+                this.nodes.forEach(n => {
+                    n.osc.start();
+                    n.breathingLfo.start();
+                });
+                this.playing = true;
+            }
+            stop() {
+                if(!this.playing) return;
+                this.ctx.suspend();
+                this.playing = false;
+            }
+        }
+
+        const audio = new RomanticAudioEngine();
+        const musicBtn = document.getElementById('music-toggle');
+        musicBtn.addEventListener('click', () => {
+            if(audio.playing) {
+                audio.stop();
+                musicBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else {
+                audio.start();
+                musicBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+        });
+    </script>
+
+    <!-- 3D Interactive Simulation Graphics Core Logic Engine -->
+    <script>
+        let container, scene, camera, renderer, controls;
+        let flowerGroups = [];
+        let firefliesSystem, floatingHeartsSystem;
+        let moodState = 'romantic-dark';
+        let targetCamPos = new THREE.Vector3(0, 4.5, 20);
+        let currentCamPos = new THREE.Vector3(0, 35, 45); // Soft majestic entry positioning
+        const clock = new THREE.Clock();
+
+        // Architectural Map Settings for Species Distribution Layout Coordinates
+        const locations = [
+            { id: "roses", x: -10, z: 6, color: 0xff1443, secondary: 0x99001a, focusX: -10, focusZ: 11 },
+            { id: "tulips", x: 12, z: -3, color: 0xffb700, secondary: 0xff5500, focusX: 12, focusZ: 2 },
+            { id: "orchids", x: -9, z: -14, color: 0xff33aa, secondary: 0x880055, focusX: -9, focusZ: -9 },
+            { id: "lilies", x: 11, z: -28, color: 0xffe6f2, secondary: 0xff3388, focusX: 11, focusZ: -23 },
+            { id: "sunflowers", x: -13, z: -40, color: 0xffd700, secondary: 0xb37400, focusX: -13, focusZ: -35 },
+            { id: "cherries", x: 6, z: -52, color: 0xffb3d9, secondary: 0xff66b2, focusX: 6, focusZ: -47 }
+        ];
+
+        init3D();
+        animate();
+
+        function init3D() {
+            container = document.getElementById('webgl-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a0011);
+            scene.fog = new THREE.FogExp2(0x1a0011, 0.028);
+
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.copy(currentCamPos);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.1;
+            container.appendChild(renderer.domElement);
+
+            // Orbit Interaction parameters Configuration
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI/2 - 0.06; // Prevent subsurface visibility drops
+            controls.minDistance = 4;
+            controls.maxDistance = 55;
+            controls.enablePan = false;
+
+            // Highly detailed multidirectional lighting configuration matrices
+            const ambientLight = new THREE.AmbientLight(0xffc2d1, 0.75);
+            scene.add(ambientLight);
+
+            const romanticSun = new THREE.DirectionalLight(0xfff5ea, 1.4);
+            romanticSun.position.set(25, 35, 15);
+            romanticSun.castShadow = true;
+            romanticSun.shadow.mapSize.width = 2048;
+            romanticSun.shadow.mapSize.height = 2048;
+            romanticSun.shadow.bias = -0.0008;
+            scene.add(romanticSun);
+
+            // Colored soft light wells for cinematic mood rendering enhancement
+            const pinkGlowWell = new THREE.HemisphereLight(0x67002d, 0x11000b, 0.95);
+            scene.add(pinkGlowWell);
+
+            // Generate Topographical Bed
+            buildRomanticLandscape();
+
+            // Assemble and Populate High-Detail Biological Models
+            locations.forEach((loc, index) => {
+                const cluster = buildFlowerCluster(loc.color, loc.secondary, index);
+                cluster.position.set(loc.x, 0, loc.z);
+                scene.add(cluster);
+                flowerGroups.push(cluster);
+            });
+
+            // Initialize Custom Atmosphere Layers (Fireflies + Heart Petals)
+            buildAtmosphereLayers();
+
+            window.addEventListener('resize', onWindowResize);
+
+            // Lift Loader Curtain gracefully
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = 0;
+                setTimeout(() => document.getElementById('loader').style.display = 'none', 1200);
+            }, 1800);
+        }
+
+        /* Topography Procedural Structural Mesh Generation */
+        function buildRomanticLandscape() {
+            const geo = new THREE.PlaneGeometry(240, 240, 90, 90);
+            geo.rotateX(-Math.PI / 2);
+
+            const positions = geo.attributes.position;
+            for (let i = 0; i < positions.count; i++) {
+                const x = positions.getX(i);
+                const z = positions.getZ(i);
+                // Graceful organic rolling slope calculation waves
+                const y = Math.sin(x * 0.04) * Math.cos(z * 0.04) * 2.8 + Math.sin(x * 0.08) * 0.9;
+                positions.setY(i, y);
+            }
+            geo.computeVertexNormals();
+
+            // Luxury satin fabric texture feel finish properties
+            const mat = new THREE.MeshStandardMaterial({
+                color: 0x240014,
+                roughness: 0.65,
+                metalness: 0.15,
+                flatShading: true
+            });
+
+            const landscapeMesh = new THREE.Mesh(geo, mat);
+            landscapeMesh.receiveShadow = true;
+            scene.add(landscapeMesh);
+
+            // Warm Glowing Support Grid Overlay Layout
+            const grid = new THREE.GridHelper(240, 60, 0xff3366, 0x3d001d);
+            grid.position.y = -0.35;
+            scene.add(grid);
+        }
+
+        /* High-Detail Procedural Botanical Modeling Architecture Module */
+        function buildFlowerCluster(primaryColor, secondaryColor, type) {
+            const group = new THREE.Group();
+            const count = 10 + Math.floor(Math.random() * 5);
+
+            for (let i = 0; i < count; i++) {
+                const flower = new THREE.Group();
+                
+                // Set structural placement variations
+                const r = 1.2 + Math.random() * 3.8;
+                const angle = (i / count) * Math.PI * 2 + Math.random() * 0.4;
+                const lx = Math.cos(angle) * r;
+                const lz = Math.sin(angle) * r;
+                
+                const height = 2.5 + Math.random() * 3.8;
+                
+                // Advanced Organic Tapered Curving Stem Generation
+                const stemGeo = new THREE.CylinderGeometry(0.03, 0.09, height, 10, 4);
+                stemGeo.translate(0, height / 2, 0);
+                
+                // Inject slight natural curvature bend into stems
+                const stemPos = stemGeo.attributes.position;
+                for(let j=0; j<stemPos.count; j++) {
+                    let yVal = stemPos.getY(j);
+                    stemPos.setX(j, stemPos.getX(j) + Math.sin(yVal * 0.4) * 0.15);
+                }
+                stemGeo.computeVertexNormals();
+
+                const stemMat = new THREE.MeshStandardMaterial({ 
+                    color: 0x3d6e35, 
+                    roughness: 0.85, 
+                    bumpScale: 0.05 
+                });
+                const stemMesh = new THREE.Mesh(stemGeo, stemMat);
+                stemMesh.castShadow = true;
+                flower.add(stemMesh);
+
+                // Initialize Individual Bloom Object Heads
+                const bloom = new THREE.Group();
+                // Match curve offset positioning displacement
+                bloom.position.set(Math.sin(height * 0.4) * 0.15, height, 0);
+
+                // Run procedural complex geometry builders
+                switch(type) {
+                    case 0: buildRealisticRose(bloom, primaryColor, secondaryColor); break;
+                    case 1: buildRealisticTulip(bloom, primaryColor, secondaryColor); break;
+                    case 2: buildRealisticOrchid(bloom, primaryColor, secondaryColor); break;
+                    case 3: buildRealisticLily(bloom, primaryColor, secondaryColor); break;
+                    case 4: buildRealisticSunflower(bloom, primaryColor, secondaryColor); break;
+                    case 5: buildRealisticCherry(bloom, primaryColor, secondaryColor); break;
+                }
+
+                flower.add(bloom);
+                flower.position.set(lx, -0.4, lz);
+                
+                const scale = 0.75 + Math.random() * 0.55;
+                flower.scale.set(scale, scale, scale);
+                
+                flower.userData = {
+                    baseRotationY: Math.random() * Math.PI,
+                    swaySpeed: 1.2 + Math.random() * 1.2,
+                    swayAmount: 0.06 + Math.random() * 0.04,
+                    bloomRef: bloom,
+                    originalScale: scale
+                };
+                flower.rotation.y = flower.userData.baseRotationY;
+
+                group.add(flower);
+            }
+            return group;
+        }
+
+        // --- PRODUCTION LEVEL DETAILED BOTANICAL SHAPE MODELS ---
+
+        function buildRealisticRose(root, prim, sec) {
+            // Multilayered nested organic spiral pattern assembly
+            const totalLayers = 5;
+            const petalsPerLayer = [4, 6, 6, 6, 5];
+            
+            for(let layer = 0; layer < totalLayers; layer++) {
+                const count = petalsPerLayer[layer];
+                const layerScale = 1.0 - (layer * 0.16);
+                const mat = new THREE.MeshStandardMaterial({
+                    color: layer % 2 === 0 ? prim : sec,
+                    roughness: 0.5,
+                    metalness: 0.05,
+                    side: THREE.DoubleSide
+                });
+
+                for(let i = 0; i < count; i++) {
+                    // Curved heart-shaped high-detail real rose petal construction configuration
+                    const petalGeo = new THREE.SphereGeometry(0.45, 12, 12, 0, Math.PI, 0, Math.PI * 0.65);
+                    petalGeo.rotateX(Math.PI / 2);
+                    
+                    // Modulate shape parameters individually to organic curved natural state
+                    const pos = petalGeo.attributes.position;
+                    for(let p=0; p<pos.count; p++) {
+                        let z = pos.getZ(p);
+                        pos.setZ(p, z + (Math.sin(pos.getY(p) * 2) * 0.12));
+                    }
+                    petalGeo.computeVertexNormals();
+
+                    const petal = new THREE.Mesh(petalGeo, mat);
+                    petal.scale.set(1.1, 0.7, 1.6).multiplyScalar(layerScale);
+                    
+                    petal.position.y = layer * 0.07;
+                    // Mathematical spiral offset rotation alignment
+                    petal.rotation.z = ((i * (360 / count)) + (layer * 25)) * Math.PI / 180;
+                    petal.rotation.x = 0.35 + (layer * 0.22);
+                    
+                    root.add(petal);
+                }
+            }
+        }
+
+        function buildRealisticTulip(root, prim, sec) {
+            const matOuter = new THREE.MeshStandardMaterial({ color: prim, roughness: 0.45, side: THREE.DoubleSide });
+            const matInner = new THREE.MeshStandardMaterial({ color: sec, roughness: 0.5, side: THREE.DoubleSide });
+            
+            // Generate interlocked realistic bulb flower layers
+            for(let i=0; i<7; i++) {
+                const petalGeo = new THREE.SphereGeometry(0.4, 16, 16, 0, Math.PI * 0.7, 0, Math.PI * 0.8);
+                petalGeo.rotateX(Math.PI / 2.2);
+                
+                const petal = new THREE.Mesh(petalGeo, i % 2 === 0 ? matOuter : matInner);
+                petal.scale.set(0.9, 1.4, 0.9);
+                petal.rotation.y = (i * 51.4) * Math.PI / 180;
+                petal.rotation.x = 0.15;
+                petal.position.y = 0.4;
+                root.add(petal);
+            }
+        }
+
+        function buildRealisticOrchid(root, prim, sec) {
+            const mat = new THREE.MeshStandardMaterial({ color: prim, roughness: 0.55, side: THREE.DoubleSide });
+            const lipMat = new THREE.MeshStandardMaterial({ color: sec, roughness: 0.4, side: THREE.DoubleSide });
+            
+            // Create asymmetrical highly specialized orchid layout wings
+            for(let i=0; i<3; i++) {
+                const wingGeo = new THREE.ConeGeometry(0.22, 0.8, 12);
+                wingGeo.rotateX(Math.PI / 2);
+                const wing = new THREE.Mesh(wingGeo, mat);
+                wing.scale.set(1.3, 0.2, 1);
+                wing.rotation.z = (i * 120) * Math.PI / 180;
+                wing.position.y = 0.3;
+                root.add(wing);
+            }
+            
+            // Side wide fan wings
+            for(let i=0; i<2; i++) {
+                const wideGeo = new THREE.SphereGeometry(0.35, 12, 12);
+                wideGeo.scale(1.5, 0.6, 0.1);
+                const widePetal = new THREE.Mesh(wideGeo, mat);
+                widePetal.rotation.z = (45 + i * 90) * Math.PI / 180;
+                widePetal.position.set(i === 0 ? -0.3 : 0.3, 0.35, 0.05);
+                root.add(widePetal);
+            }
+
+            // Flamboyant central trumpet lip model unit
+            const lipGeo = new THREE.TorusGeometry(0.18, 0.08, 8, 24, Math.PI * 1.5);
+            const lip = new THREE.Mesh(lipGeo, lipMat);
+            lip.position.set(0, 0.15, 0.15);
+            lip.rotation.x = Math.PI / 4;
+            root.add(lip);
+        }
+
+        function buildRealisticLily(root, prim, sec) {
+            const mat = new THREE.MeshStandardMaterial({ color: prim, roughness: 0.4, side: THREE.DoubleSide });
+            
+            // Elegant swept back out-curved long petals configuration
+            for(let i=0; i<6; i++) {
+                const petalGeo = new THREE.CylinderGeometry(0.01, 0.35, 1.4, 16, 4, true);
+                petalGeo.rotateX(Math.PI / 1.8);
+                
+                // Curve petal geometries outward dynamically along arrays
+                const pos = petalGeo.attributes.position;
+                for(let j=0; j<pos.count; j++) {
+                    let y = pos.getY(j);
+                    pos.setZ(j, pos.getZ(j) - Math.pow(y*0.5, 2) * 0.35);
+                }
+                petalGeo.computeVertexNormals();
+
+                const petal = new THREE.Mesh(petalGeo, mat);
+                petal.rotation.y = (i * 60) * Math.PI / 180;
+                petal.position.y = 0.5;
+                root.add(petal);
+            }
+
+            // Elegant center pistil stamen extensions array
+            const stamenMat = new THREE.MeshBasicMaterial({ color: sec });
+            for(let s=0; s<5; s++) {
+                const wireGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.6);
+                wireGeo.translate(0, 0.3, 0);
+                const stamen = new THREE.Mesh(wireGeo, stamenMat);
+                stamen.rotation.z = 0.2;
+                stamen.rotation.y = (s * 72) * Math.PI / 180;
+                stamen.position.y = 0.3;
+                root.add(stamen);
+            }
+        }
+
+        function buildRealisticSunflower(root, prim, sec) {
+            const petalMat = new THREE.MeshStandardMaterial({ color: prim, roughness: 0.5, side: THREE.DoubleSide });
+            
+            // Double row densely interleaved golden sunflower ray array
+            const rayRows = [40, 32];
+            for(let r=0; r<rayRows.length; r++) {
+                const count = rayRows[r];
+                const radiusDist = 0.45 - (r * 0.05);
+                for(let i=0; i<count; i++) {
+                    const leafGeo = new THREE.BoxGeometry(0.07, 0.85, 0.015);
+                    leafGeo.translate(0, 0.42, 0);
+                    const leaf = new THREE.Mesh(leafGeo, petalMat);
+                    
+                    leaf.rotation.z = (i * (360 / count)) * Math.PI / 180;
+                    leaf.rotation.x = 0.14 + (r * 0.08);
+                    leaf.position.y = 0.08;
+                    leaf.scale.set(1, 0.9 + r*0.1, 1);
+                    root.add(leaf);
+                }
+            }
+
+            // Puffy detailed center disc core structure configuration
+            const coreGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.14, 24);
+            coreGeo.rotateX(Math.PI / 2);
+            const coreMat = new THREE.MeshStandardMaterial({ color: sec, roughness: 0.95, flatShading: true });
+            const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+            coreMesh.position.y = 0.08;
+            root.add(coreMesh);
+        }
+
+        function buildRealisticCherry(root, prim, sec) {
+            const petalMat = new THREE.MeshStandardMaterial({ color: prim, roughness: 0.48, side: THREE.DoubleSide });
+            
+            // 5-Petal organic notched indent configuration assembly
+            for(let i=0; i<5; i++) {
+                const petalGeo = new THREE.SphereGeometry(0.3, 12, 12, 0, Math.PI, 0, Math.PI * 0.75);
+                petalGeo.rotateX(Math.PI / 1.9);
+                
+                const petal = new THREE.Mesh(petalGeo, petalMat);
+                petal.scale.set(1.1, 0.5, 1.3);
+                petal.rotation.z = (i * 72) * Math.PI / 180;
+                petal.rotation.x = 0.28;
+                petal.position.y = 0.12;
+                root.add(petal);
+            }
+            
+            // Delicate central cluster points
+            const centerGeo = new THREE.SphereGeometry(0.08, 6, 6);
+            const centerMat = new THREE.MeshBasicMaterial({ color: sec });
+            const center = new THREE.Mesh(centerGeo, centerMat);
+            center.position.y = 0.15;
+            root.add(center);
+        }
+
+        /* Ambient Dynamic Volumetric Particles Layer Systems Base */
+        function buildAtmosphereLayers() {
+            // Magical Golden Fireflies System
+            const fCount = 350;
+            const fGeo = new THREE.BufferGeometry();
+            const fPos = new Float32Array(fCount * 3);
+
+            for (let i = 0; i < fCount * 3; i += 3) {
+                fPos[i] = (Math.random() - 0.5) * 90;
+                fPos[i + 1] = Math.random() * 28;
+                fPos[i + 2] = (Math.random() - 0.5) * 90;
+            }
+
+            fGeo.setAttribute('position', new THREE.BufferAttribute(fPos, 3));
+
+            const fMat = new THREE.PointsMaterial({
+                color: 0xffd700,
+                size: 0.28,
+                transparent: true,
+                opacity: 0.85,
+                blending: THREE.AdditiveBlending
+            });
+
+            firefliesSystem = new THREE.Points(fGeo, fMat);
+            scene.add(firefliesSystem);
+
+            // Falling Kinetic Deep Heart-Petal Atmospheric Overlay
+            const hCount = 200;
+            const hGeo = new THREE.BufferGeometry();
+            const hPos = new Float32Array(hCount * 3);
+            const hSpeeds = [];
+
+            for (let i = 0; i < hCount * 3; i += 3) {
+                hPos[i] = (Math.random() - 0.5) * 70;
+                hPos[i + 1] = 25 + Math.random() * 20;
+                hPos[i + 2] = (Math.random() - 0.5) * 70;
+
+                hSpeeds.push({
+                    y: 0.06 + Math.random() * 0.06,
+                    x: (Math.random() - 0.5) * 0.03,
+                    rotOffset: Math.random() * Math.PI
+                });
+            }
+
+            hGeo.setAttribute('position', new THREE.BufferAttribute(hPos, 3));
+            
+            const hMat = new THREE.PointsMaterial({
+                color: 0xff3366,
+                size: 0.45,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.NormalBlending
+            });
+
+            floatingHeartsSystem = new THREE.Points(hGeo, hMat);
+            floatingHeartsSystem.userData = { speeds: hSpeeds };
+            scene.add(floatingHeartsSystem);
+        }
+
+        /* Mouse Raycasting Hover Geometry Interaction Matrix */
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(flowerGroups, true);
+
+            if (intersects.length > 0) {
+                let obj = intersects[0].object;
+                while (obj.parent && !obj.userData.bloomRef) {
+                    obj = obj.parent;
+                }
+                if (obj.userData.bloomRef && !obj.userData.isHovered) {
+                    obj.userData.isHovered = true;
+                    
+                    let baseScale = obj.userData.originalScale;
+                    let targetScale = baseScale * 1.4; // Spectacular bloom interaction expand
+                    
+                    let step = 0;
+                    function growAnimation() {
+                        if(step < 12) {
+                            step++;
+                            let s = THREE.MathUtils.lerp(baseScale, targetScale, step / 12);
+                            obj.scale.set(s,s,s);
+                            requestAnimationFrame(growAnimation);
+                        }
+                    }
+                    growAnimation();
+
+                    setTimeout(() => {
+                        let backStep = 0;
+                        function shrinkAnimation() {
+                            if(backStep < 12) {
+                                backStep++;
+                                let s = THREE.MathUtils.lerp(targetScale, baseScale, backStep / 12);
+                                obj.scale.set(s,s,s);
+                                requestAnimationFrame(shrinkAnimation);
+                            } else {
+                                obj.userData.isHovered = false;
+                            }
+                        }
+                        shrinkAnimation();
+                    }, 1000);
+                }
+            }
+        });
+
+        /* Spatial Navigation Position View Transition Blocks */
+        function focusSpecies(index) {
+            const loc = locations[index];
+            targetCamPos.set(loc.focusX, 3.8, loc.focusZ);
+            controls.target.set(loc.x, 1.8, loc.z);
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* Core Interface Sync Scroll Management Linkages */
+        let currentSectionIdx = 0;
+        const sections = document.querySelectorAll('section');
+        const hudItems = document.querySelectorAll('.hud-item');
+
+        window.addEventListener('scroll', () => {
+            let scrollPos = window.scrollY;
+            let windowHeight = window.innerHeight;
+            let idx = Math.round(scrollPos / windowHeight);
+            
+            if(idx !== currentSectionIdx && idx < sections.length) {
+                currentSectionIdx = idx;
+                
+                sections.forEach(s => s.classList.remove('active'));
+                sections[currentSectionIdx].classList.add('active');
+
+                hudItems.forEach(h => h.classList.remove('active'));
+                hudItems[currentSectionIdx].classList.add('active');
+
+                const loc = locations[currentSectionIdx];
+                targetCamPos.set(loc.focusX, 3.8, loc.focusZ);
+                
+                let targetLook = new THREE.Vector3(loc.x, 1.8, loc.z);
+                let currentLook = controls.target.clone();
+                
+                let step = 0;
+                function interpolateLookTarget() {
+                    if(step < 25) {
+                        step++;
+                        controls.target.lerpVectors(currentLook, targetLook, step / 25);
+                        requestAnimationFrame(interpolateLookTarget);
+                    }
+                }
+                interpolateLookTarget();
+            }
+        });
+
+        /* Mood Shift Theme Toggle Engine */
+        const themeBtn = document.getElementById('theme-toggle');
+        themeBtn.addEventListener('click', () => {
+            if(moodState === 'romantic-dark') {
+                moodState = 'romantic-light';
+                document.body.setAttribute('data-theme', 'light');
+                themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+                scene.background.setHex(0xffdde1);
+                scene.fog.color.setHex(0xffdde1);
+            } else {
+                moodState = 'romantic-dark';
+                document.body.removeAttribute('data-theme');
+                themeBtn.innerHTML = '<i class="fas fa-heart"></i>';
+                scene.background.setHex(0x1a0011);
+                scene.fog.color.setHex(0x1a0011);
+            }
+        });
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        /* Execution Frame Render Pipeline Core Loop */
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime();
+
+            // Handle Smooth Position Target Slopes
+            currentCamPos.lerp(targetCamPos, 0.025);
+            camera.position.copy(currentCamPos);
+
+            // Calculate Realistic Harmonic Organic Wind-Sway Forces
+            flowerGroups.forEach(group => {
+                group.children.forEach(flower => {
+                    const ud = flower.userData;
+                    const windSwayForce = Math.sin(time * ud.swaySpeed + ud.baseRotationY) * ud.swayAmount;
+                    flower.rotation.z = windSwayForce;
+                    flower.rotation.x = Math.cos(time * ud.swaySpeed * 0.8) * (ud.swayAmount * 0.6);
+                });
+            });
+
+            // Handle Fireflies Scintillating Space Drift Movements
+            if (firefliesSystem) {
+                const posArr = firefliesSystem.geometry.attributes.position.array;
+                for (let i = 1; i < posArr.length; i += 3) {
+                    posArr[i] += Math.sin(time * 0.8 + i) * 0.008; // Wave oscillation hover drift
+                }
+                firefliesSystem.geometry.attributes.position.needsUpdate = true;
+            }
+
+            // Handle Romantic Falling Hearts Kinematics Processing loop
+            if (floatingHeartsSystem) {
+                const positions = floatingHeartsSystem.geometry.attributes.position.array;
+                const speeds = floatingHeartsSystem.userData.speeds;
+                let idx = 0;
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i + 1] -= speeds[idx].y; // Apply downward vector flow velocity
+                    positions[i] += speeds[idx].x + Math.sin(time * 0.5 + i) * 0.015; // Side drift wind flow
+
+                    // Boundaries recycle floor checks
+                    if (positions[i + 1] < -1.5) {
+                        positions[i + 1] = 24 + Math.random() * 8;
+                        positions[i] = (Math.random() - 0.5) * 70;
+                    }
+                    idx++;
+                }
+                floatingHeartsSystem.geometry.attributes.position.needsUpdate = true;
+                floatingHeartsSystem.rotation.y += 0.0015;
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
